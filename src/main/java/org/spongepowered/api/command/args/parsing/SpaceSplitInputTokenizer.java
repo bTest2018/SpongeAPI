@@ -40,8 +40,17 @@ class SpaceSplitInputTokenizer implements InputTokenizer {
         int lastIndex = 0;
         int spaceIndex;
         while ((spaceIndex = arguments.indexOf(" ")) != -1) {
-            ret.add(new SingleArg((arguments = arguments.substring(0, spaceIndex)), lastIndex, lastIndex + spaceIndex));
+            if (spaceIndex != 0) {
+                ret.add(new SingleArg(arguments.substring(0, spaceIndex), lastIndex, lastIndex + spaceIndex));
+                arguments = arguments.substring(spaceIndex);
+            } else {
+                arguments = arguments.substring(1);
+            }
             lastIndex += spaceIndex + 1;
+        }
+
+        if (!arguments.isEmpty()) {
+            ret.add(new SingleArg(arguments, lastIndex, lastIndex + arguments.length()));
         }
         return ret;
     }

@@ -512,12 +512,14 @@ public final class GenericArguments {
             ArgumentParseException lastException = null;
             for (CommandElement element : this.elements) {
                 Object startState = args.getState();
+                CommandContext.Snapshot contextSnapshot = context.getSnapshot();
                 try {
                     element.parse(source, args, context);
                     return;
                 } catch (ArgumentParseException ex) {
                     lastException = ex;
                     args.setState(startState);
+                    context.applySnapshot(contextSnapshot);
                 }
             }
             if (lastException != null) {
