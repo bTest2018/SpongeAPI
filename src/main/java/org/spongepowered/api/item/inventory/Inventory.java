@@ -37,6 +37,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.ResettableBuilder;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
@@ -44,7 +45,7 @@ import java.util.function.Consumer;
 /**
  * Base interface for queryable inventories.
  */
-public interface Inventory extends Iterable<Inventory>, Nameable, PropertyHolder {
+public interface Inventory extends Nameable, PropertyHolder {
 
     /**
      * Creates a new {@link Inventory.Builder} to build an {@link Inventory}.
@@ -73,40 +74,18 @@ public interface Inventory extends Iterable<Inventory>, Nameable, PropertyHolder
     Inventory root();
 
     /**
-     * Returns an iterable view of all {@link Slot}s (leaf nodes) in this
-     * Inventory.
+     * Returns a list of all {@link Slot}s (leaf nodes) in this Inventory.
      *
-     * @param <T> expected inventory type, specified as generic to allow easy
-     *      pseudo-duck-typing
-     * @return an iterable view of all Slots (leaf nodes) in this inventory
+     * @return a list of all Slots (leaf nodes) in this inventory
      */
-    <T extends Inventory> Iterable<T> slots();
+    List<Slot> slots();
 
     /**
-     * Return the first child inventory, effectively the same as
-     * <code>Inventory::iterator().next()</code> but more convenient when we are
-     * expecting a result set with only a single entry. Also use type specifier
-     * to allow easy pseudo-duck-typing. If no children, then returns
-     * <code>this</code>.
+     * Returns a list of all direct child inventories.
      *
-     * @param <T> expected inventory type, specified as generic to allow easy
-     *      pseudo-duck-typing
-     * @return the first child inventory, if there are no children then simply
-     *      returns <code>this</code>
+     * @return a list of all direct child inventories.
      */
-    <T extends Inventory> T first();
-
-    /**
-     * Return the next sibling inventory, allows traversing the inventory
-     * hierarchy without using an iterator. If no more siblings, returns an
-     * {@link EmptyInventory}.
-     *
-     * @param <T> expected inventory type, specified as generic to allow easy
-     *      pseudo-duck-typing
-     * @return the next sibling inventory, or an {@link EmptyInventory} if
-     *      there are no further siblings
-     */
-    <T extends Inventory> T next();
+    List<Inventory> subInventories();
 
     /**
      * Gets and remove the first available stack from this Inventory.
@@ -422,12 +401,10 @@ public interface Inventory extends Iterable<Inventory>, Nameable, PropertyHolder
      * Query this inventory for inventories matching any of the supplied
      * queries. Logical <code>OR</code> is applied between operands.
      *
-     * @param <T> expected inventory type, specified as generic to allow easy
-     *      pseudo-duck-typing
      * @param operations queries to check against
      * @return the query result
      */
-    <T extends Inventory> T query(QueryOperation<?>... operations);
+    Inventory query(QueryOperation<?>... operations);
 
     /**
      * Returns the {@link PluginContainer} who built this inventory.
