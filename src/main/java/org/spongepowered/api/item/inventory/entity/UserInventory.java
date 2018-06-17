@@ -59,7 +59,7 @@ public interface UserInventory<T extends User> extends CarriedInventory<T> {
      * @return The main inventory grid
      */
     default GridInventory getMainGrid() {
-        return this.getMain().getGrid();
+        return this.getMain().getMain();
     }
 
     /**

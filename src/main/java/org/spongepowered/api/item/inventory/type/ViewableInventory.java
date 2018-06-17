@@ -26,7 +26,6 @@ package org.spongepowered.api.item.inventory.type;
 
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.plugin.PluginContainer;
 
 import java.util.Set;
 
@@ -48,22 +47,6 @@ public interface ViewableInventory extends Inventory {
      * @return True if viewers are currently looking at this inventory
      */
     boolean hasViewers();
-
-    /**
-     * Shows this Inventory to the given viewer.
-     *
-     * @param viewer The viewer to show this inventory to
-     * @throws IllegalArgumentException if a {@link PluginContainer} is not the root of the cause
-     */
-    void open(Player viewer) throws IllegalArgumentException;
-
-    /**
-     * Stops showing this Inventory to the given viewer.
-     *
-     * @param viewer The viewer to stop showing this inventory to
-     * @throws IllegalArgumentException if a {@link PluginContainer} is not the root of the cause
-     */
-    void close(Player viewer) throws IllegalArgumentException;
 
     /**
      * Gets whether the specified player can interact with this object.
