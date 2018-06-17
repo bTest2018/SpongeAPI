@@ -30,6 +30,7 @@ import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.Interactable;
@@ -222,6 +223,63 @@ public interface Inventory extends Nameable, PropertyHolder {
      *      and any items rejected or ejected as a result of the operation
      */
     InventoryTransactionResult set(ItemStack stack);
+
+    /**
+     * Gets and remove the stack at the supplied index in this Inventory.
+     *
+     * @see Inventory#poll()
+     * @param index slot index to query
+     * @return matching stacks, as per the semantics of {@link Inventory#poll()}
+     */
+    Optional<ItemStack> poll(SlotIndex index);
+
+    /**
+     * Gets and remove the stack at the supplied index in this Inventory.
+     *
+     * @see Inventory#poll()
+     * @param index slot index to query
+     * @param limit item limit
+     * @return matching stacks, as per the semantics of {@link Inventory#poll()}
+     */
+    Optional<ItemStack> poll(SlotIndex index, int limit);
+
+    /**
+     * Gets without removing the stack at the supplied index in this Inventory.
+     *
+     * @see Inventory#peek()
+     * @param index slot index to query
+     * @return matching stacks, as per the semantics of {@link Inventory#peek()}
+     */
+    Optional<ItemStack> peek(SlotIndex index);
+
+    /**
+     * Gets without removing the stack at the supplied index in this Inventory.
+     *
+     * @see Inventory#peek()
+     * @param index slot index to query
+     * @param limit item limit
+     * @return matching stacks, as per the semantics of {@link Inventory#peek()}
+     */
+    Optional<ItemStack> peek(SlotIndex index, int limit);
+
+    /**
+     * Sets the item in the specified slot.
+     *
+     * @see Inventory#set(ItemStack)
+     * @param index Slot index to set
+     * @param stack Stack to insert
+     * @return matching stacks, as per the semantics of {@link Inventory#set}
+     */
+    InventoryTransactionResult set(SlotIndex index, ItemStack stack);
+
+    /**
+     * Gets the {@link Slot} at the specified position.
+     *
+     * @param index Slot index to retrieve
+     * @return slot at the specified position, or {@link Optional#empty()} if
+     *      no matching slot
+     */
+    Optional<Slot> getSlot(SlotIndex index);
 
     /**
      * Clears this inventory if it is clearable.

@@ -32,7 +32,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.item.inventory.type.OrderedInventory;
 
 import java.util.Optional;
 
@@ -40,7 +39,7 @@ import java.util.Optional;
  * Equipment inventory for {@link Carrier}s
  * that can carry equipment.
  */
-public interface EquipmentInventory extends OrderedInventory, CarriedInventory<ArmorEquipable> {
+public interface EquipmentInventory extends Inventory, CarriedInventory<ArmorEquipable> {
 
     /**
      * Gets and remove the stack for the specified equipment type in this
