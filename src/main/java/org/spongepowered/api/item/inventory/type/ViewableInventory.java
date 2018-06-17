@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * Interface for inventories which may be interacted with by Players.
  */
-public interface Interactable extends Inventory {
+public interface ViewableInventory extends Inventory {
 
     /**
      * Gets the current viewers looking at this Inventory.

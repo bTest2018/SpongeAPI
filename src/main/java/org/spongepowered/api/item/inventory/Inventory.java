@@ -33,7 +33,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.api.item.inventory.type.Interactable;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.ResettableBuilder;
 
@@ -86,7 +86,7 @@ public interface Inventory extends Nameable, PropertyHolder {
      *
      * @return a list of all direct child inventories.
      */
-    List<Inventory> subInventories();
+    List<Inventory> children();
 
     /**
      * Gets and remove the first available stack from this Inventory.
@@ -535,13 +535,13 @@ public interface Inventory extends Nameable, PropertyHolder {
     }
 
     /**
-     * Returns this inventory as an interactable inventory if possible.
+     * Returns this inventory as a viewable inventory if possible.
      *
-     * <p>Not all inventories are interactable (e.g. a custom inventory of size 5x5)</p>
+     * <p>Not all inventories are viewable (e.g. a custom inventory of size 5x5)</p>
      *
-     * @return This inventory as an interactable inventory if possible.
+     * @return This inventory as an viewable inventory if possible.
      */
-    Optional<Interactable> asInteractable();
+    Optional<ViewableInventory> asViewable();
 
     /**
      * A Builder for Inventories based on {@link InventoryArchetype}s.
