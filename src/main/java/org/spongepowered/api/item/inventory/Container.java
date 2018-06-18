@@ -44,4 +44,8 @@ public interface Container extends Inventory {
      */
     boolean isViewedSlot(Slot slot);
 
+    // TODO javadocs
+    void setCursor(ItemStack item);
+    ItemStack getCursor();
+
 }
