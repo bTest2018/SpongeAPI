@@ -87,10 +87,10 @@ import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -1837,24 +1837,30 @@ public final class GenericArguments {
 
         @Override
         protected Iterable<String> getChoices(CommandSource source) {
-            Set<Iterable<Entity>> worldEntities = Sponge.getServer().getWorlds().stream().map(World::getEntities).collect(Collectors.toSet());
-            return Iterables.filter(Iterables.transform(Iterables.concat(worldEntities), input -> {
-                if (input == null) {
-                    return null;
-                }
-                if (!this.checkEntity(input)) {
-                    return null;
-                }
-                if (input instanceof Player) {
-                    return ((Player)input).getName();
-                }
-                return input.getUniqueId().toString();
-            }), Objects::nonNull);
+            Set<String> worldEntities = Sponge.getServer().getWorlds().stream().flatMap(x -> x.getEntities().stream())
+                    .filter(this::checkEntity)
+                    .map(x -> x.getUniqueId().toString())
+                    .collect(Collectors.toSet());
+            Collection<Player> players = Sponge.getServer().getOnlinePlayers();
+            if (!players.isEmpty() && checkEntity(players.iterator().next())) {
+                final Set<String> setToReturn = new HashSet<>(worldEntities); // to ensure mutability
+                players.forEach(x -> setToReturn.add(x.getName()));
+                return setToReturn;
+            }
+
+            return worldEntities;
         }
 
         @Override
         protected Object getValue(String choice) throws IllegalArgumentException {
-            UUID uuid = UUID.fromString(choice);
+            UUID uuid;
+            try {
+                uuid = UUID.fromString(choice);
+            } catch (IllegalArgumentException ignored) {
+                // Player could be a name
+                return Sponge.getServer().getPlayer(choice)
+                        .orElseThrow(() -> new IllegalArgumentException("Input value " + choice + " does not represent a valid entity"));
+            }
             boolean found = false;
             for (World world : Sponge.getServer().getWorlds()) {
                 Optional<Entity> ret = world.getEntity(uuid);
