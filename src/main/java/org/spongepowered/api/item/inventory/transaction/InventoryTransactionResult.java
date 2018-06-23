@@ -24,36 +24,26 @@
  */
 package org.spongepowered.api.item.inventory.transaction;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.ResettableBuilder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 /**
  * An interface for data returned by inventory operations which encapsulates the
  * result of an attempted operation.
  */
-public final class InventoryTransactionResult {
+public interface InventoryTransactionResult {
 
     /**
      * Begin building a new InventoryTransactionResult.
      *
      * @return A new builder
      */
-    public static Builder builder() {
-        return new Builder();
+    static Builder builder() {
+        return Sponge.getRegistry().createBuilder(Builder.class);
     }
     
     /**
@@ -62,7 +52,7 @@ public final class InventoryTransactionResult {
      *
      * @return A new transaction result
      */
-    public static InventoryTransactionResult successNoTransactions() {
+    static InventoryTransactionResult successNoTransactions() {
         return InventoryTransactionResult.builder().type(Type.SUCCESS).build();
     }
 
@@ -72,14 +62,14 @@ public final class InventoryTransactionResult {
      *
      * @return A new transaction result
      */
-    public static InventoryTransactionResult failNoTransactions() {
+    static InventoryTransactionResult failNoTransactions() {
         return InventoryTransactionResult.builder().type(Type.ERROR).build();
     }
 
     /**
      * The type of InventoryTransactionResult.
      */
-    public enum Type {
+    enum Type {
 
         /**
          * The inventory operation succeeded.
@@ -107,17 +97,6 @@ public final class InventoryTransactionResult {
 
     }
 
-    private final List<SlotTransaction> slotTransactions;
-    private final List<ItemStackSnapshot> rejected;
-
-    final Type type;
-
-    InventoryTransactionResult(Builder builder) {
-        this.type = checkNotNull(builder.resultType, "Result type");
-        this.rejected = builder.rejected != null ? ImmutableList.copyOf(builder.rejected) : Collections.emptyList();
-        this.slotTransactions = builder.slotTransactions != null ? ImmutableList.copyOf(builder.slotTransactions) : Collections.emptyList();
-    }
-
     /**
      * Combines two transaction-results into one. All slot-transactions and rejected items are combined.
      * The resulting type is the first of this list to occur: {@link Type#ERROR}, {@link Type#FAILURE}, {@link Type#SUCCESS}
@@ -125,45 +104,24 @@ public final class InventoryTransactionResult {
      * @param other The other transaction-result.
      * @return The combined transaction-result.
      */
-    public InventoryTransactionResult and(InventoryTransactionResult other) {
-        Type resultType = Type.SUCCESS;
-        if (this.type == Type.ERROR || other.type == Type.ERROR) {
-            resultType = Type.ERROR;
-        }
-        if (this.type == Type.FAILURE || other.type == Type.FAILURE) {
-            resultType = Type.FAILURE;
-        }
-        return builder().type(resultType).reject(this.rejected).reject(other.rejected)
-                .transaction(this.slotTransactions).transaction(other.slotTransactions)
-                .build();
-    }
+    InventoryTransactionResult and(InventoryTransactionResult other);
 
     /**
      * Reverts all SlotTransactions from this transaction-result
      */
-    public void revert() {
-        for (SlotTransaction transaction : Lists.reverse(this.slotTransactions)) {
-            transaction.getSlot().set(transaction.getOriginal().createStack());
-        }
-    }
+    void revert();
 
     /**
      * Reverts all SlotTransactions from this transaction-result if it was a {@link Type#FAILURE}
      */
-    public void revertOnFailure() {
-        if (this.type == Type.FAILURE) {
-            this.revert();
-        }
-    }
+    void revertOnFailure();
 
     /**
      * Gets the type of result.
      *
      * @return the type of result
      */
-    public Type getType() {
-        return this.type;
-    }
+    Type getType();
 
     /**
      * If items were supplied to the operation, this collection will return any
@@ -171,9 +129,7 @@ public final class InventoryTransactionResult {
      *
      * @return any items which were rejected as part of the inventory operation
      */
-    public Collection<ItemStackSnapshot> getRejectedItems() {
-        return this.rejected;
-    }
+    List<ItemStackSnapshot> getRejectedItems();
 
     /**
      * If the operation replaced items in the inventory, this collection returns
@@ -181,17 +137,9 @@ public final class InventoryTransactionResult {
      *
      * @return any items which were ejected as part of the inventory operation
      */
-    public List<SlotTransaction> getSlotTransactions() {
-        return this.slotTransactions;
-    }
+    List<SlotTransaction> getSlotTransactions();
 
-    public static final class Builder implements ResettableBuilder<InventoryTransactionResult, Builder> {
-
-        @Nullable Type resultType;
-        @Nullable List<ItemStackSnapshot> rejected;
-        @Nullable List<SlotTransaction> slotTransactions;
-
-        Builder() {}
+    interface Builder extends ResettableBuilder<InventoryTransactionResult, Builder> {
 
         /**
          * Sets the {@link Type} of transaction result being built.
@@ -199,10 +147,7 @@ public final class InventoryTransactionResult {
          * @param type The type of transaction result
          * @return This builder, for chaining
          */
-        public Builder type(final Type type) {
-            this.resultType = checkNotNull(type, "Type cannot be null!");
-            return this;
-        }
+        Builder type(final Type type);
 
         /**
          * Adds the provided {@link ItemStack itemstacks} as stacks that have been
@@ -211,17 +156,7 @@ public final class InventoryTransactionResult {
          * @param itemStacks The itemstacks being rejected
          * @return This builder, for chaining
          */
-        public Builder reject(ItemStack... itemStacks) {
-            if (this.rejected == null) {
-                this.rejected = new ArrayList<>();
-            }
-            for (ItemStack itemStack1 : itemStacks) {
-                if (!itemStack1.isEmpty()) {
-                    this.rejected.add(itemStack1.createSnapshot());
-                }
-            }
-            return this;
-        }
+        Builder reject(ItemStack... itemStacks);
 
         /**
          * Adds the provided {@link ItemStack itemstacks} as stacks that have been
@@ -230,17 +165,7 @@ public final class InventoryTransactionResult {
          * @param itemStacks The itemstacks being rejected
          * @return This builder, for chaining
          */
-        public Builder reject(List<ItemStackSnapshot> itemStacks) {
-            if (this.rejected == null) {
-                this.rejected = new ArrayList<>();
-            }
-            for (ItemStackSnapshot itemStack1 : itemStacks) {
-                if (!itemStack1.isEmpty()) {
-                    this.rejected.add(itemStack1);
-                }
-            }
-            return this;
-        }
+        Builder reject(List<ItemStackSnapshot> itemStacks);
 
 
         /**
@@ -250,9 +175,7 @@ public final class InventoryTransactionResult {
          * @param slotTransactions The slotTransactions
          * @return This builder, for chaining
          */
-        public Builder transaction(SlotTransaction... slotTransactions) {
-            return this.transaction(Arrays.asList(slotTransactions));
-        }
+        Builder transaction(SlotTransaction... slotTransactions);
 
         /**
          * Adds the provided {@link ItemStack itemstacks} as stacks that are
@@ -261,40 +184,13 @@ public final class InventoryTransactionResult {
          * @param slotTransactions The slotTransactions
          * @return This builder, for chaining
          */
-        public Builder transaction(List<SlotTransaction> slotTransactions) {
-            if (this.slotTransactions == null) {
-                this.slotTransactions = new ArrayList<>();
-            }
-            this.slotTransactions.addAll(slotTransactions);
-            return this;
-        }
+        Builder transaction(List<SlotTransaction> slotTransactions);
 
         /**
          * Creates a new {@link InventoryTransactionResult}.
          *
          * @return A new inventory transaction result
          */
-        public InventoryTransactionResult build() {
-            checkState(this.resultType != null, "ResultType cannot be null!");
-            return new InventoryTransactionResult(this);
-        }
-
-        @Override
-        public Builder from(InventoryTransactionResult value) {
-            checkNotNull(value, "InventoryTransactionResult cannot be null!");
-            this.resultType = checkNotNull(value.type, "ResultType cannot be null!");
-            this.slotTransactions = new ArrayList<>(value.getSlotTransactions());
-            this.rejected = new ArrayList<>(value.getRejectedItems());
-            return this;
-        }
-
-        @Override
-        public Builder reset() {
-            this.resultType = null;
-            this.rejected = null;
-            this.slotTransactions = null;
-            return this;
-        }
-
+        InventoryTransactionResult build();
     }
 }
