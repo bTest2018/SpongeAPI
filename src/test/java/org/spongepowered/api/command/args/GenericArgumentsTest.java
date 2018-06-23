@@ -30,6 +30,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spongepowered.api.command.args.GenericArguments.allOf;
 import static org.spongepowered.api.command.args.GenericArguments.bool;
 import static org.spongepowered.api.command.args.GenericArguments.choices;
+import static org.spongepowered.api.command.args.GenericArguments.choicesInsensitive;
 import static org.spongepowered.api.command.args.GenericArguments.enumValue;
 import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.integer;
@@ -123,6 +124,16 @@ public class GenericArgumentsTest {
     public void testChoices() throws ArgumentParseException {
         CommandElement el = choices(untr("val"), ImmutableMap.of("a", "one", "b", "two"));
         CommandContext context = parseForInput("a", el);
+        assertEquals("one", context.getOne("val").get());
+
+        this.expected.expect(ArgumentParseException.class);
+        parseForInput("A", el);
+    }
+
+    @Test
+    public void testChoicesInsensitive() throws ArgumentParseException {
+        CommandElement el = choicesInsensitive(untr("val"), ImmutableMap.of("a", "one", "b", "two"));
+        CommandContext context = parseForInput("A", el);
         assertEquals("one", context.getOne("val").get());
 
         this.expected.expect(ArgumentParseException.class);
