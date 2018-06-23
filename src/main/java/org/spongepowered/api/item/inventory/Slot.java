@@ -39,10 +39,10 @@ public interface Slot extends Inventory {
     int getStackSize();
 
     /**
-     * Transforms this Slot into the default Type.
+     * Returns the slot in a {@link Container}s viewed inventory or itself.
      *
-     * @return the transformed Slot or itself if already the default type
+     * @return the viewed inventory slot or itself if not a container slot
      */
-    Slot transform();
+    Slot viewedSlot();
 
 }

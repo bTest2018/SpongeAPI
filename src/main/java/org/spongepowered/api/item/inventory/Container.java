@@ -24,6 +24,9 @@
  */
 package org.spongepowered.api.item.inventory;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * A Container is effectively a <em>ViewModel</em> for a particular set of
  * {@link Inventory} objects used to allow players to interact
@@ -44,8 +47,27 @@ public interface Container extends Inventory {
      */
     boolean isViewedSlot(Slot slot);
 
-    // TODO javadocs
+    /**
+     * Returns the list of viewed inventories.
+     * <p>This is usually at least the inventory a player opened and the players inventory.</p>
+     * <p>It is not necessary, that all slots of the viewed inventories are visible or interactable with.</p>
+     *
+     * @return the list of viewed inventories.
+     */
+    List<Inventory> getViewed();
+
+    /**
+     * Sets the viewing players cursor item.
+     *
+     * @param item The item to set.
+     */
     void setCursor(ItemStack item);
-    ItemStack getCursor();
+
+    /**
+     * Gets the viewing players cursor item.
+     *
+     * @return The players cursor item.
+     */
+    Optional<ItemStack> getCursor();
 
 }

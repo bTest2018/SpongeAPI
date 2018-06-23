@@ -465,6 +465,17 @@ public interface Inventory extends Nameable, PropertyHolder {
     Inventory query(QueryOperation<?>... operations);
 
     /**
+     * Query this inventory for a single inventory matching the supplied inventory type.
+     * This query will return {@link Optional#empty()} when the query does not return a
+     * single inventory matching the supplied inventory type.
+     *
+     * @param inventoryType The inventory type to query for
+     * @param <T> The Type of inventory
+     * @return the query result
+     */
+    <T extends Inventory> Optional<T> query(Class<T> inventoryType);
+
+    /**
      * Returns the {@link PluginContainer} who built this inventory.
      *
      * @return The container
