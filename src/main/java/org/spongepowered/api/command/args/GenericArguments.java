@@ -561,7 +561,7 @@ public final class GenericArguments {
             ArgumentParseException lastException = null;
             for (CommandElement element : this.elements) {
                 Object startState = args.getState();
-                CommandContext.Snapshot contextSnapshot = context.getSnapshot();
+                CommandContext.Snapshot contextSnapshot = context.createSnapshot();
                 try {
                     element.parse(source, args, context);
                     return;

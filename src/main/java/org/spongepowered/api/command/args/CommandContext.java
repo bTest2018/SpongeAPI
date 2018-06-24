@@ -141,7 +141,7 @@ public final class CommandContext {
      *      by the caller
      */
     @SuppressWarnings("unchecked")
-    public <T> T getOneUnchecked(String key)
+    public <T> T requireOne(String key)
             throws NoSuchElementException, IllegalArgumentException, ClassCastException {
         Collection<Object> values = this.parsedArgs.get(key);
         if (values.size() == 1) {
@@ -167,9 +167,9 @@ public final class CommandContext {
      *      context)
      * @throws ClassCastException if the element type is not what is expected
      */
-    public <T> T getOneUnchecked(Text key)
+    public <T> T requireOne(Text key)
             throws NoSuchElementException, IllegalArgumentException, ClassCastException {
-        return getOneUnchecked(ArgUtils.textToArgKey(key));
+        return requireOne(ArgUtils.textToArgKey(key));
     }
 
     /**
@@ -239,7 +239,7 @@ public final class CommandContext {
      * @return The {@link Snapshot} containing the current state of the
      *      {@link CommandContext}
      */
-    public Snapshot getSnapshot() {
+    public Snapshot createSnapshot() {
         return new Snapshot(this.parsedArgs);
     }
 
