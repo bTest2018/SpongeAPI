@@ -40,7 +40,6 @@ import org.spongepowered.api.util.ResettableBuilder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.function.Consumer;
 
 /**
@@ -89,33 +88,24 @@ public interface Inventory extends Nameable, PropertyHolder {
     List<Inventory> children();
 
     /**
-     * Gets and remove the first available stack from this Inventory.
+     * Gets and remove the first non empty stack from this Inventory.
      *
-     * <p>'Available' has a different meaning for different inventory types. In
-     * a single-slot inventory this has a fixed implication. However larger and
-     * more complex inventories are at liberty to implement whatever logic they
-     * wish to back this method. If an inventory cannot provide a meaningful
-     * implementation of this method then it should return
-     * {@link Optional#empty()} instead.</p>
+     * <p>If this inventory is empty {@link ItemStack#empty()} is returned</p>
      *
-     * <p>For consumers, this means that just because an inventory doesn't
-     * return anything here, this does not imply that the inventory is empty,
-     * just that a more specific query is required to obtain items from it.</p>
-     *
-     * @return The first available item stack, or {@link Optional#empty()} if
-     *      unavailable or unsupported
+     * @return The first available item stack, or {@link ItemStack#empty()} if unavailable
      */
-    Optional<ItemStack> poll();
+    ItemStack poll();
 
     /**
-     * <p>Get and remove up to <code>limit</code> items of the type in the first
-     * available stack in this Inventory from all stacks in this Inventory. If
-     * no stack is available then {@link Optional#empty()} is returned (as per
-     * the usual behaviour of {@link #poll()}, otherwise a new {@link ItemStack}
-     * is returned containing the removed items, the contents of the stack in
-     * the inventory are reduced by the number of items consumed. Note that this
-     * method attempts to consume items into the output up to
-     * <code>limit</code>, which may consume items from an arbitrary number
+     * Get and remove up to <code>limit</code> items of the type in the first
+     * non empty stack in this Inventory from all stacks in this Inventory.
+     *
+     * <p>If this inventory is empty {@link ItemStack#empty()} is returned
+     * otherwise otherwise a new {@link ItemStack} is returned containing
+     * the removed items.</p>
+     *
+     * <p>Note that this method attempts to consume items into the output up
+     * to <code>limit</code>, which may consume items from an arbitrary number
      * of internal slots.</p>
      *
      * <p>For example, assume an inventory containing 4 slots contains stacks as
@@ -133,99 +123,81 @@ public interface Inventory extends Nameable, PropertyHolder {
      * which returns a set of slots containing a specific item type:</p>
      *
      * <blockquote>
-     *     <pre>Optional&lt;ItemStack&gt; q = inv.query(ItemTypes.DIRT).poll(1);
+     *     <pre>ItemStack q = inv.query(ItemTypes.DIRT).poll(1);
      *     </pre>
      * </blockquote>
      *
-     * @see #poll
      * @param limit Maximum number of items to consume from the inventory
      * @return Matching {@link ItemStack} guaranteed to have items less than or
      *      equal to the specified <em>limit</em>.
      */
-    Optional<ItemStack> poll(int limit);
+    ItemStack poll(int limit);
 
     /**
-     * Gets without removing the first available stack from this Inventory. For
-     * the definition of 'available', see {@link #poll}.
+     * Gets without removing the first non empty stack from this Inventory.
      *
-     * @return First available itemstack, or {@link Optional#empty()} if
-     *      unavailable or unsupported
+     * @return First non empty itemstack, or {@link ItemStack#empty()} if unavailable
      */
-    Optional<ItemStack> peek();
+    ItemStack peek();
 
     /**
-     * Uses the same semantics as {@link #poll(int)} but <b>does not remove the
-     * items from the inventory</b>. The {@link ItemStack} returned is thus a
-     * new ItemStack containing <b>a copy of</b> the items in inventory. Use
-     * this method only if you wish to determine whether a call to
-     * {@link #poll(int)} is likely to succeed.
+     * Gets without removing up to <code>limit</code> items of the type in the first
+     * non empty stack in this Inventory from all stacks in this Inventory.
      *
      * @see #peek
      * @param limit Maximum number of items to consume from the inventory
      * @return Matching {@link ItemStack} guaranteed to have items less than or
      *      equal to the specified <em>limit</em>.
      */
-    Optional<ItemStack> peek(int limit);
+    ItemStack peek(int limit);
 
     /**
-     * Try to put an ItemStack into this Inventory. Just like
-     * {@link Queue}, this method returns true if the Inventory
-     * accepted the stack and false if not, the size of the supplied stack is
-     * reduced by the number of items successfully consumed by the Inventory.
+     * Try to put an ItemStack into this Inventory. The {@link InventoryTransactionResult}
+     * will be a success only when the entire itemstack fits the inventory.
+     *
+     * <p>The size of the supplied stack is reduced by the number of items
+     * successfully consumed by the inventory.</p>
+     *
+     * <p>Any rejected items are also available in the transaction result.</p>
      *
      * <p>Unlike {@link #set}, this method's general contract does not permit
-     * items in the Inventory to be replaced. However trying to insert items
-     * that an Inventory cannot accept is not an error condition, the size of
-     * the supplied stack will simply not be reduced if no items are consumed by
-     * the Inventory.</p>
+     * items in the Inventory to be replaced.</p>
      *
      * @param stack A stack of items to attempt to insert into the Inventory,
      *      note that upon successful insertion the supplied ItemStack itself
-     *      will be mutated and returned with size reduced by the number of
-     *      items successfully consumed by the Inventory
-     * @return true if <em>one or more</em> (up to the total number of items in
-     *      the supplied stack) items were consumed. False if no items were
-     *      consumed by the target inventory.
+     *      will be reduced by the number of items successfully consumed by the
+     *      Inventory
+     * @return A SUCCESS transactionresult if the entire stack was consumed and
+     *      FAILURE when the stack was not or partially consumed.
      */
     InventoryTransactionResult offer(ItemStack stack);
 
     /**
      * Forcibly put the supplied stack into this inventory. Overwrites existing
-     * objects in the inventory as required to accommodate the entire stack. The
-     * entire stack is always consumed.
+     * objects in the inventory as required to accommodate the entire stack.
      *
      * <p>The general contract of this method is to prioritise insertion of the
      * supplied items over items already in the Inventory. However the Inventory
-     * may still reject the supplied items if they are of an unsupported type
-     * for the target (for example trying to insert non-fuel items into a fuel
-     * slot) or if the number of items is larger than the total capacity of the
-     * inventory and not all items from the supplied stack can be consumed.</p>
+     * may still reject the supplied items for example if the number of items is
+     * larger than the total capacity of the inventory and not all items from the
+     * supplied stack can be consumed.</p>
      *
-     * <p>For {@link Slot}s, the supplied stack is generally consumed and the
-     * existing contents ejected (at the discretion of the target Inventory).
-     * For multi-slot inventories the insertion order is up to the target
-     * inventory to decide, and does not have to match the traversal order of
-     * the leaf nodes as supplied by {@link #slots()}, although this is
-     * generally recommended. Inventories should document their specific
-     * insertion logic where the insertion order differs from the traversal
-     * order.</p>
+     * <p>The size of the supplied stack is reduced by the number of items
+     * successfully consumed by the inventory.</p>
      *
-     * <p>Consumers should inspect the returned
-     * {@link InventoryTransactionResult} and act accordingly. Ejected items
-     * should generally be "thrown" into the world or deposited into another
-     * Inventory (depending on the operation in question. The supplied stack is
-     * not adjusted, any rejected items are returned in the operation result
-     * struct.</p>
+     * <p>Any rejected items are also available in the transaction result.</p>
      *
-     * @param stack the stack to insert into the Inventory, will be mutated by
+     * @param stack The stack to insert into the Inventory, will be reduced by
      *      the number of items successfully consumed
-     * @return operation result indicating the success state of the operation
-     *      and any items rejected or ejected as a result of the operation
+     * @return A SUCCESS transactionresult if the entire stack was consumed and
+     *      FAILURE when the stack was not or partially consumed.
      */
     InventoryTransactionResult set(ItemStack stack);
 
     /**
      * Gets and remove the stack at the supplied index in this Inventory.
+     *
+     * <p>Returns {@link Optional#empty()} when there is not Slot at {@link SlotIndex}</p>
      *
      * @see Inventory#poll()
      * @param index slot index to query
@@ -235,6 +207,8 @@ public interface Inventory extends Nameable, PropertyHolder {
 
     /**
      * Gets and remove the stack at the supplied index in this Inventory.
+     *
+     * <p>Returns {@link Optional#empty()} when there is not Slot at {@link SlotIndex}</p>
      *
      * @see Inventory#poll()
      * @param index slot index to query
@@ -246,6 +220,8 @@ public interface Inventory extends Nameable, PropertyHolder {
     /**
      * Gets without removing the stack at the supplied index in this Inventory.
      *
+     * <p>Returns {@link Optional#empty()} when there is not Slot at {@link SlotIndex}</p>
+     *
      * @see Inventory#peek()
      * @param index slot index to query
      * @return matching stacks, as per the semantics of {@link Inventory#peek()}
@@ -254,6 +230,8 @@ public interface Inventory extends Nameable, PropertyHolder {
 
     /**
      * Gets without removing the stack at the supplied index in this Inventory.
+     *
+     * <p>Returns {@link Optional#empty()} when there is not Slot at {@link SlotIndex}</p>
      *
      * @see Inventory#peek()
      * @param index slot index to query
@@ -264,6 +242,9 @@ public interface Inventory extends Nameable, PropertyHolder {
 
     /**
      * Sets the item in the specified slot.
+     *
+     * <p>Always returns a {@link InventoryTransactionResult.Type#FAILURE} when
+     * there is not Slot at {@link SlotIndex}</p>
      *
      * @see Inventory#set(ItemStack)
      * @param index Slot index to set
@@ -452,8 +433,7 @@ public interface Inventory extends Nameable, PropertyHolder {
      * @return matching properties, may be absent if no property matched the
      *      supplied criteria
      */
-    @Override
-    <T extends Property<?, ?>> Optional<T> getProperty(Class<T> property);
+    @Override <T extends Property<?, ?>> Optional<T> getProperty(Class<T> property);
 
     /**
      * Query this inventory for inventories matching any of the supplied
