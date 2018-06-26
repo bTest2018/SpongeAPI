@@ -63,11 +63,11 @@ public interface UserInventory<T extends User> extends CarriedInventory<T> {
     }
 
     /**
-     * Gets the equipment inventory.
+     * Get the armor equipment inventory
      *
-     * @return The equipment inventory
+     * @return The armor inventory
      */
-    EquipmentInventory getEquipment();
+    EquipmentInventory getArmor();
 
     /**
      * Gets the offhand inventory.
@@ -76,4 +76,10 @@ public interface UserInventory<T extends User> extends CarriedInventory<T> {
      */
     Slot getOffhand();
 
+    /**
+     * Gets the equipment inventory.
+     *
+     * @return The equipment inventory
+     */
+    EquipmentInventory getEquipment();
 }
