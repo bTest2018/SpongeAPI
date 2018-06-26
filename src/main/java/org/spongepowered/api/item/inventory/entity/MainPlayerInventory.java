@@ -52,7 +52,7 @@ public interface MainPlayerInventory extends Inventory {
      *
      * @return The grid of the players main inventory
      */
-    GridInventory getMain();
+    GridInventory getStorage();
 
 
 }

@@ -42,7 +42,7 @@ public interface UserInventory<T extends User> extends CarriedInventory<T> {
      *
      * @return The main inventory
      */
-    MainPlayerInventory getMain();
+    MainPlayerInventory getPrimary();
 
     /**
      * Gets the hotbar inventory.
@@ -50,7 +50,7 @@ public interface UserInventory<T extends User> extends CarriedInventory<T> {
      * @return The hotbar
      */
     default Hotbar getHotbar() {
-        return this.getMain().getHotbar();
+        return this.getPrimary().getHotbar();
     }
 
     /**
@@ -58,8 +58,8 @@ public interface UserInventory<T extends User> extends CarriedInventory<T> {
      *
      * @return The main inventory grid
      */
-    default GridInventory getMainGrid() {
-        return this.getMain().getMain();
+    default GridInventory getStorage() {
+        return this.getPrimary().getStorage();
     }
 
     /**
