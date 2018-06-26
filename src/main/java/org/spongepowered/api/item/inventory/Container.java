@@ -65,6 +65,8 @@ public interface Container extends Inventory {
 
     /**
      * Gets the viewing players cursor item.
+     * <p>Returns {@link Optional#empty()} when no viewer is present.
+     * E.g. after the container has been closed</p>
      *
      * @return The players cursor item.
      */
