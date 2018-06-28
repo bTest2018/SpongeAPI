@@ -32,7 +32,7 @@ import org.spongepowered.api.item.inventory.type.GridInventory;
 
 /**
  * Represents the inventory of a {@link User}.
- * It consists of a {@link MainPlayerInventory} (containing the main {@link GridInventory}
+ * It consists of a {@link PrimaryPlayerInventory} (containing the main {@link GridInventory}
  * and the {@link Hotbar}) and an {@link EquipmentInventory}
  */
 public interface UserInventory<T extends User> extends CarriedInventory<T> {
@@ -42,7 +42,7 @@ public interface UserInventory<T extends User> extends CarriedInventory<T> {
      *
      * @return The main inventory
      */
-    MainPlayerInventory getPrimary();
+    PrimaryPlayerInventory getPrimary();
 
     /**
      * Gets the hotbar inventory.

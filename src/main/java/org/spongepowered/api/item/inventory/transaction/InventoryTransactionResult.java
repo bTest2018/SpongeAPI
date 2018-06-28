@@ -165,7 +165,7 @@ public interface InventoryTransactionResult {
          * @param itemStacks The itemstacks being rejected
          * @return This builder, for chaining
          */
-        Builder reject(List<ItemStackSnapshot> itemStacks);
+        Builder reject(Iterable<ItemStackSnapshot> itemStacks);
 
 
         /**
@@ -184,7 +184,7 @@ public interface InventoryTransactionResult {
          * @param slotTransactions The slotTransactions
          * @return This builder, for chaining
          */
-        Builder transaction(List<SlotTransaction> slotTransactions);
+        Builder transaction(Iterable<SlotTransaction> slotTransactions);
 
         /**
          * Creates a new {@link InventoryTransactionResult}.

@@ -29,9 +29,9 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 
 /**
- * A {@link Player}'s main inventory including the {@link Hotbar}.
+ * A {@link Player}'s primary inventory including the {@link Hotbar}.
  */
-public interface MainPlayerInventory extends Inventory {
+public interface PrimaryPlayerInventory extends Inventory {
 
     /**
      * Gets the hotbar of the player.
