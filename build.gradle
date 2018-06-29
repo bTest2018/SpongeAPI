@@ -67,8 +67,6 @@ dependencies {
 
 // JAR manifest configuration
 jar {
-    from sourceSets.ap.output
-
     manifest {
         attributes('Main-Class': 'org.spongepowered.api.util.InformativeMain')
     }
@@ -80,9 +78,15 @@ task sourceJar(type: Jar) {
     from sourceSets.ap.allSource
 }
 
+task apJar(type: Jar) {
+    classifier = 'ap'
+    from sourceSets.ap.output
+}
+
 artifacts {
     archives sourceJar
     archives javadocJar
+    archives apJar
 }
 
 // Compile time code generator for the event factory
@@ -220,7 +224,6 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
     classifier = 'shaded'
-    from sourceSets.ap.output
 }
 
 artifacts {
